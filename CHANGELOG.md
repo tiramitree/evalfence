@@ -10,6 +10,8 @@
 - Add a standard-library-only, source-bound STATE-Bench adapter with exact
   source/AST checks, three-domain offline runtime observations, and one
   deterministic no-API causal control.
+- Re-enter Python UTF-8 mode before upstream loaders run so source-bound
+  evidence is invariant to the host's default text encoding.
 - Register the bounded
   `microsoft/STATE-Bench@4efcbf2d4fe60df04878859b692d9391f3d5b33a`
   case study without claiming an official score, submission effect, or defect.

@@ -4,7 +4,7 @@
         "judge_calls": 0,
         "simulator_client_calls": 0
     },
-    "boundary_case_sha256": "2e5559c6ee9ebb199ba82c6c246bfa84bd9b658f9aee08074980152891d74a00",
+    "boundary_case_sha256": "c4ad902f5b02a430b7d75a5aeac9de935a65f5b50bfee11d8455a3fda02304e1",
     "causal_control": {
         "deterministic_state_score_delta": 1,
         "official_score_claimed": false,

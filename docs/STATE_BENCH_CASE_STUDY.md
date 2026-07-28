@@ -25,6 +25,9 @@ registered shopping task and environment, license, and package metadata. It
 also recognizes exact CRLF checkout hashes while requiring those bytes to be
 only a line-ending translation of the registered Git blob.
 
+Before any upstream loader reads text, the adapter re-enters Python UTF-8 mode.
+This removes the host locale from the registered content-digest boundary.
+
 The source worktree must be at the exact detached revision and contain no
 tracked modification, untracked file, or ignored residue.
 

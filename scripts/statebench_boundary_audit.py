@@ -114,6 +114,25 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
+def ensure_utf8_runtime() -> None:
+    """Re-enter Python UTF-8 mode before any upstream loader reads text."""
+    if sys.flags.utf8_mode:
+        return
+    environment = os.environ.copy()
+    environment["PYTHONUTF8"] = "1"
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-X",
+            "utf8",
+            str(Path(__file__).resolve()),
+            *sys.argv[1:],
+        ],
+        env=environment,
+    )
+    raise SystemExit(result.returncode)
+
+
 def canonical_bytes(value: Any) -> bytes:
     return json.dumps(
         value,
@@ -1047,6 +1066,7 @@ def write_canonical(path: Path, value: Any) -> None:
 
 
 def main() -> int:
+    ensure_utf8_runtime()
     args = parse_args()
     upstream_root = args.statebench_root.resolve()
     ensure_output_targets(upstream_root, args.case_out, args.summary_out)
