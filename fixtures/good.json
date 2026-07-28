@@ -1,0 +1,41 @@
+{
+  "schema_version": "evalfence.case.v1",
+  "case_id": "good-standard-set-metrics",
+  "prediction": {
+    "source": "prediction.model_patch",
+    "input_present": true,
+    "intervals": [
+      {
+        "file": "src/lib.rs",
+        "start": 1,
+        "end": 10
+      }
+    ]
+  },
+  "gold": {
+    "source": "gold.init_ctx",
+    "input_present": true,
+    "intervals": [
+      {
+        "file": "src/lib.rs",
+        "start": 1,
+        "end": 100
+      }
+    ]
+  },
+  "reported": {
+    "prediction_source": "prediction.model_patch",
+    "pred_size": 10,
+    "gold_size": 100,
+    "intersection": 10,
+    "precision": 1.0,
+    "recall": 0.1,
+    "f1": 0.18181818181818182
+  },
+  "policy": {
+    "allowed_prediction_sources": [
+      "prediction.model_patch"
+    ],
+    "tolerance": 1e-9
+  }
+}

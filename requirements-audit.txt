@@ -1,0 +1,2 @@
+# Reproduction lane: CPython 3.12 on Linux x86_64 (manylinux_2_28).
+pyarrow==23.0.1 --hash=sha256:813d99f31275919c383aab17f0f455a04f5a429c261cc411b1e9a8f5e4aaaa05

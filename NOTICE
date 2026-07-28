@@ -1,0 +1,7 @@
+EvalFence
+Copyright 2026 tiramitree
+
+This product includes a bounded adapter for the public ContextBench project.
+ContextBench remains copyright its respective authors and is used under the
+Apache License, Version 2.0. EvalFence does not vendor ContextBench source or
+dataset files.

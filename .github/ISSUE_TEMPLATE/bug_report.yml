@@ -1,0 +1,41 @@
+name: Bug report
+description: Report a reproducible EvalFence defect without private data.
+title: "[bug] "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include credentials, private prompts, proprietary source, personal data, or unpublished research.
+  - type: input
+    id: version
+    attributes:
+      label: EvalFence version or revision
+      placeholder: v0.1.0 or a commit id
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      options:
+        - Linux
+        - Windows
+        - macOS
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Minimal public reproduction
+      description: Use synthetic or already-public inputs only.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected and observed behavior
+    validations:
+      required: true

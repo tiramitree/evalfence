@@ -1,0 +1,35 @@
+{
+  "boundaries": [
+    "This measures the exact public fallback and formula code paths against one public 500-row dataset.",
+    "It does not establish whether any published leaderboard submission omitted model_patch.",
+    "Standard set recall is intersection divided by gold size; it is not asserted to be the upstream authors' intended containment metric.",
+    "The separate upstream aggregate path recomputes micro recall from total intersection and gold size; this audit does not claim aggregate or leaderboard impact.",
+    "No model, harness, product, adoption, review, or production-quality claim follows from these observations."
+  ],
+  "observations": {
+    "dataset_rows": 500,
+    "gold_fallback_cases_with_deleted_lines": 421,
+    "max_positive_gap": 0.999408,
+    "mean_per_instance_record_recall": 0.941993,
+    "mean_standard_set_recall_same_cases": 0.082896,
+    "median_positive_gap": 0.946818,
+    "per_instance_record_recall_greater_than_standard": 410,
+    "per_instance_record_recall_one_standard_below_one": 380,
+    "per_instance_standard_recall_formula_mismatches": 410,
+    "rows_without_deleted_patch_lines": 79
+  },
+  "schema_version": "evalfence.contextbench-case-study.v1",
+  "scope": {
+    "commit": "1436c28a8eb95496da4ea69ad458b9f8a8eb7d61",
+    "dataset": "data/contextbench_verified.parquet",
+    "dataset_sha256": "e9dcfd504cbfb849ac815a79040c793d0d92f94eecc9b5a4ee3e1445a2f8a791",
+    "diff_parser_sha256": "d3028286a3e96c4142eb81cdf934ba3ea6345975c8261b64fa7289011b31a162",
+    "evaluate_py_sha256": "059b7f51cc09cf858c02b630e1eb5f78df7e105eb08da2950619dadf97dc1594",
+    "gold_parser_sha256": "f3cb58c4ec443f78e68d4831a41e023091642c93279483195a707bae63c9842f",
+    "license": "Apache-2.0",
+    "metrics_compute_sha256": "457dd5b03ef5b89b93f892fd4b45658cc9795600f7e13271c65e39657f2df358",
+    "pyarrow": "23.0.1",
+    "tolerance": 1e-09,
+    "upstream": "EuniAI/ContextBench"
+  }
+}
