@@ -46,7 +46,8 @@
 - Empty metric denominators are explicit `null`.
 - Findings use exit `2`; input and runtime errors use exit `1`.
 - The public adapter rejects any tracked, untracked, or ignored upstream residue
-  and verifies exact file hashes before import.
+  and verifies canonical Git blob hashes before import. Checked-out text may
+  differ only by Git's LF-to-CRLF translation; the dataset must be byte-exact.
 - Adapters remain separate so their wider dependency and execution boundary is
   visible.
 - CI scans tracked text and named generated artifacts before upload, but that

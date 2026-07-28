@@ -19,11 +19,14 @@ leaderboard reproduction.
 - dataset SHA-256:
   `e9dcfd504cbfb849ac815a79040c793d0d92f94eecc9b5a4ee3e1445a2f8a791`
 - evaluator SHA-256:
-  `059b7f51cc09cf858c02b630e1eb5f78df7e105eb08da2950619dadf97dc1594`
+  `a07e211ce72ee155c69c1e3f194526d559f1b1b152528153fa9ff0082d52b22d`
 - metric helper SHA-256:
-  `457dd5b03ef5b89b93f892fd4b45658cc9795600f7e13271c65e39657f2df358`
+  `ab5401785d2f630b73e2672c5ec40e9e5b082a324e0dbe28d392c9984f19db01`
 
 The adapter also binds the exact gold parser, diff parser, and license hashes.
+Hashes are over canonical Git blob bytes. Checked-out source must be byte-exact
+or differ only by Git's LF-to-CRLF translation; the Parquet dataset must be
+byte-exact.
 It refuses a source worktree containing any tracked modification, untracked
 file, or ignored residue before importing the package.
 

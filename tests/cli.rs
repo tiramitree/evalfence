@@ -45,8 +45,12 @@ fn finding_case_exits_two_and_reports_stable_codes() {
 fn batch_aggregates_pass_and_failure_without_hiding_findings() {
     let temp = tempfile::tempdir().unwrap();
     let input = temp.path().join("cases.jsonl");
-    let good = fs::read_to_string(fixture("good.json")).unwrap();
-    let bad = fs::read_to_string(fixture("gold-fallback.json")).unwrap();
+    let good: serde_json::Value =
+        serde_json::from_str(&fs::read_to_string(fixture("good.json")).unwrap()).unwrap();
+    let bad: serde_json::Value =
+        serde_json::from_str(&fs::read_to_string(fixture("gold-fallback.json")).unwrap()).unwrap();
+    let good = serde_json::to_string(&good).unwrap();
+    let bad = serde_json::to_string(&bad).unwrap();
     fs::write(&input, format!("{good}\n{bad}\n")).unwrap();
 
     let output = Command::new(env!("CARGO_BIN_EXE_evalfence"))

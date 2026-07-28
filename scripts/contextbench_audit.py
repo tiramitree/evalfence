@@ -21,13 +21,14 @@ from typing import Any
 EXPECTED_COMMIT = "1436c28a8eb95496da4ea69ad458b9f8a8eb7d61"
 TOLERANCE = 1.0e-9
 EXPECTED_FILES = {
-    "contextbench/evaluate.py": "059b7f51cc09cf858c02b630e1eb5f78df7e105eb08da2950619dadf97dc1594",
-    "contextbench/parsers/gold.py": "f3cb58c4ec443f78e68d4831a41e023091642c93279483195a707bae63c9842f",
-    "contextbench/parsers/diff.py": "d3028286a3e96c4142eb81cdf934ba3ea6345975c8261b64fa7289011b31a162",
+    "contextbench/evaluate.py": "a07e211ce72ee155c69c1e3f194526d559f1b1b152528153fa9ff0082d52b22d",
+    "contextbench/parsers/gold.py": "3eee61cfe239590d069f03fdbf38a70a74efc6d170b37ca17e39ba7f9742e1a7",
+    "contextbench/parsers/diff.py": "2c8362e02169f2fe3dfa87c73602a52460b60a14196834c92cfd70aa71053754",
     "data/contextbench_verified.parquet": "e9dcfd504cbfb849ac815a79040c793d0d92f94eecc9b5a4ee3e1445a2f8a791",
-    "LICENSE": "1eb85fc97224598dad1852b5d6483bbcf0aa8608790dcc657a5a2a761ae9c8c6",
-    "contextbench/metrics/compute.py": "457dd5b03ef5b89b93f892fd4b45658cc9795600f7e13271c65e39657f2df358",
+    "LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
+    "contextbench/metrics/compute.py": "ab5401785d2f630b73e2672c5ec40e9e5b082a324e0dbe28d392c9984f19db01",
 }
+TEXT_FILES = set(EXPECTED_FILES) - {"data/contextbench_verified.parquet"}
 
 
 def parse_args() -> argparse.Namespace:
@@ -38,12 +39,31 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def sha256(path: Path) -> str:
-    digest = hashlib.sha256()
-    with path.open("rb") as handle:
-        for block in iter(lambda: handle.read(1024 * 1024), b""):
-            digest.update(block)
-    return digest.hexdigest()
+def sha256_bytes(data: bytes) -> str:
+    return hashlib.sha256(data).hexdigest()
+
+
+def verify_checked_out_file(root: Path, relative: str, expected: str) -> None:
+    blob = subprocess.run(
+        ["git", "-C", str(root), "cat-file", "blob", f"HEAD:{relative}"],
+        check=True,
+        capture_output=True,
+    ).stdout
+    actual = sha256_bytes(blob)
+    if actual != expected:
+        raise SystemExit(f"sha256 mismatch for Git blob {relative}: {actual}")
+
+    path = root / relative
+    if not path.is_file() or path.is_symlink():
+        raise SystemExit(f"expected a regular checked-out file: {relative}")
+    worktree = path.read_bytes()
+    allowed = [blob]
+    if relative in TEXT_FILES:
+        allowed.append(blob.replace(b"\n", b"\r\n"))
+    if worktree not in allowed:
+        raise SystemExit(
+            f"checked-out bytes for {relative} differ beyond Git line-ending translation"
+        )
 
 
 def verify_source(root: Path) -> None:
@@ -75,10 +95,7 @@ def verify_source(root: Path) -> None:
     if status.strip():
         raise SystemExit("ContextBench worktree must contain only exact tracked files")
     for relative, expected in EXPECTED_FILES.items():
-        path = root / relative
-        actual = sha256(path)
-        if actual != expected:
-            raise SystemExit(f"sha256 mismatch for {relative}: {actual}")
+        verify_checked_out_file(root, relative, expected)
 
 
 def interval_size(values: dict[str, list[tuple[int, int]]]) -> int:
