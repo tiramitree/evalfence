@@ -1,0 +1,84 @@
+name: STATE-Bench boundary case study
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: statebench-boundary-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  RUSTUP_TOOLCHAIN: 1.97.1
+  STATEBENCH_COMMIT: 4efcbf2d4fe60df04878859b692d9391f3d5b33a
+
+jobs:
+  statebench-boundary:
+    name: exact offline boundary control
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Public privacy gate
+        run: python scripts/privacy_gate.py --root .
+      - name: Install pinned Rust toolchain
+        run: |
+          rustup set profile minimal
+          rustup toolchain install 1.97.1
+          rustup default 1.97.1
+      - name: Fetch exact STATE-Bench revision
+        run: |
+          git init "$RUNNER_TEMP/statebench"
+          git -C "$RUNNER_TEMP/statebench" remote add origin https://github.com/microsoft/STATE-Bench.git
+          git -C "$RUNNER_TEMP/statebench" fetch --depth 1 origin "$STATEBENCH_COMMIT"
+          git -C "$RUNNER_TEMP/statebench" checkout --detach FETCH_HEAD
+          test "$(git -C "$RUNNER_TEMP/statebench" rev-parse HEAD)" = "$STATEBENCH_COMMIT"
+      - name: Build EvalFence
+        run: cargo build --locked
+      - name: Generate bounded source and runtime evidence
+        run: |
+          python scripts/statebench_boundary_audit.py \
+            --statebench-root "$RUNNER_TEMP/statebench" \
+            --case-out build/statebench-boundary/case.json \
+            --summary-out build/statebench-boundary/summary.json
+          python -c "import json; assert json.load(open('evidence/statebench-4efcbf2-agent-boundary-summary.json', encoding='utf-8')) == json.load(open('build/statebench-boundary/summary.json', encoding='utf-8'))"
+      - name: Run EvalFence and require registered findings
+        run: |
+          set +e
+          target/debug/evalfence audit-agent-boundary \
+            --input build/statebench-boundary/case.json \
+            --output build/statebench-boundary/report.json \
+            --pretty
+          status=$?
+          set -e
+          test "$status" -eq 2
+      - name: Verify exact relationships and finding counts
+        run: |
+          python scripts/verify_statebench_case_study.py \
+            --summary build/statebench-boundary/summary.json \
+            --case build/statebench-boundary/case.json \
+            --report build/statebench-boundary/report.json
+      - name: Privacy-gate generated evidence
+        run: |
+          python scripts/privacy_gate.py --root . \
+            --extra build/statebench-boundary/case.json \
+            --extra build/statebench-boundary/summary.json \
+            --extra build/statebench-boundary/report.json
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: statebench-agent-boundary
+          path: |
+            build/statebench-boundary/case.json
+            build/statebench-boundary/summary.json
+            build/statebench-boundary/report.json
+          if-no-files-found: error
+          retention-days: 14

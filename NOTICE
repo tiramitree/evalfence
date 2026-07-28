@@ -11,3 +11,8 @@ This product includes a bounded source-inspection adapter for the public
 SWE-bench project. SWE-bench remains copyright its respective authors and is
 referenced under the MIT License. EvalFence does not vendor SWE-bench source,
 prediction files, or dataset files.
+
+This product includes a bounded source/runtime adapter for the public
+STATE-Bench project. STATE-Bench remains copyright its respective authors and
+is referenced under the MIT License. EvalFence does not vendor STATE-Bench
+source, task definitions, environments, prompts, or trajectories.

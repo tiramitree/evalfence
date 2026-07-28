@@ -34,7 +34,7 @@ PATTERNS = [
         re.compile(
             "(?:"
             + "gh"
-            + "p_|github_" + "pat_|s" + "k-"
+            + "p_|github_" + "pat_|(?<![A-Za-z0-9])s" + "k-[A-Za-z0-9_-]{8,}"
             + "|AKIA[0-9A-Z]{12,}"
             + ")"
         ),

@@ -1,0 +1,105 @@
+{
+  "schema_version": "evalfence.agent-boundary.v1",
+  "case_id": "registered-exposure-control",
+  "inputs": [
+    {
+      "name": "task_id",
+      "classification": "runtime_metadata",
+      "present": true,
+      "item_count": 3,
+      "payload_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "mutable_source_alias": false
+    },
+    {
+      "name": "user_id",
+      "classification": "runtime_metadata",
+      "present": true,
+      "item_count": 3,
+      "payload_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "mutable_source_alias": false
+    },
+    {
+      "name": "domain",
+      "classification": "runtime_metadata",
+      "present": true,
+      "item_count": 3,
+      "payload_sha256": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "mutable_source_alias": false
+    },
+    {
+      "name": "now",
+      "classification": "runtime_metadata",
+      "present": true,
+      "item_count": 3,
+      "payload_sha256": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+      "mutable_source_alias": false
+    },
+    {
+      "name": "task_summary",
+      "classification": "task_oracle",
+      "present": true,
+      "item_count": 3,
+      "payload_sha256": "eeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
+      "mutable_source_alias": false
+    },
+    {
+      "name": "state_requirements",
+      "classification": "scoring_oracle",
+      "present": true,
+      "item_count": 14,
+      "payload_sha256": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "mutable_source_alias": true
+    },
+    {
+      "name": "task_requirements",
+      "classification": "scoring_oracle",
+      "present": true,
+      "item_count": 9,
+      "payload_sha256": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "mutable_source_alias": true
+    }
+  ],
+  "capabilities": [
+    {
+      "name": "travel.write_handlers",
+      "kind": "write_handler",
+      "exposed_to_agent": true,
+      "total_count": 7,
+      "callable_count": 7,
+      "mediated_count": 0
+    },
+    {
+      "name": "customer_support.write_handlers",
+      "kind": "write_handler",
+      "exposed_to_agent": true,
+      "total_count": 5,
+      "callable_count": 5,
+      "mediated_count": 0
+    },
+    {
+      "name": "shopping_assistant.write_handlers",
+      "kind": "write_handler",
+      "exposed_to_agent": true,
+      "total_count": 8,
+      "callable_count": 8,
+      "mediated_count": 0
+    }
+  ],
+  "construction_order": {
+    "baseline_snapshot_before_agent_constructor": false,
+    "baseline_snapshot_before_first_agent_turn": true
+  },
+  "reported": {
+    "input_count": 7,
+    "oracle_input_count": 3,
+    "capability_group_count": 3,
+    "unmediated_write_callable_count": 20
+  },
+  "policy": {
+    "allowed_agent_inputs": ["task_id", "user_id", "domain", "now"],
+    "forbid_oracle_inputs": true,
+    "forbid_mutable_source_aliases": true,
+    "require_write_capability_mediation": true,
+    "require_baseline_before_agent_constructor": true
+  }
+}

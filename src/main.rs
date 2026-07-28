@@ -4,7 +4,10 @@ use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use clap::{Parser, Subcommand};
-use evalfence::{AuditCase, ManifestCase, audit_batch, audit_case, audit_manifest};
+use evalfence::{
+    AgentBoundaryCase, AuditCase, ManifestCase, audit_agent_boundary, audit_batch, audit_case,
+    audit_manifest,
+};
 
 const MAX_CASE_BYTES: u64 = 8 * 1024 * 1024;
 const MAX_BATCH_BYTES: u64 = 64 * 1024 * 1024;
@@ -50,6 +53,18 @@ enum Command {
     /// Audit one keyed prediction manifest for identity and collapse hazards.
     AuditManifest {
         /// Input keyed-manifest JSON path, or '-' for stdin.
+        #[arg(short, long)]
+        input: String,
+        /// Optional report path. Stdout is used when omitted.
+        #[arg(short, long)]
+        output: Option<PathBuf>,
+        /// Pretty-print JSON.
+        #[arg(long)]
+        pretty: bool,
+    },
+    /// Audit declared custom-agent inputs, capabilities, and snapshot order.
+    AuditAgentBoundary {
+        /// Input agent-boundary JSON path, or '-' for stdin.
         #[arg(short, long)]
         input: String,
         /// Optional report path. Stdout is used when omitted.
@@ -138,6 +153,18 @@ fn run() -> Result<bool, String> {
             let case: ManifestCase = serde_json::from_slice(&bytes)
                 .map_err(|error| format!("invalid keyed-manifest JSON: {error}"))?;
             let report = audit_manifest(&case);
+            write_json(&report, output.as_deref(), pretty)?;
+            Ok(report.passed)
+        }
+        Command::AuditAgentBoundary {
+            input,
+            output,
+            pretty,
+        } => {
+            let bytes = read_input(&input, MAX_CASE_BYTES)?;
+            let case: AgentBoundaryCase = serde_json::from_slice(&bytes)
+                .map_err(|error| format!("invalid agent-boundary JSON: {error}"))?;
+            let report = audit_agent_boundary(&case);
             write_json(&report, output.as_deref(), pretty)?;
             Ok(report.passed)
         }

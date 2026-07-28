@@ -11,6 +11,14 @@ class PrivacyGateTests(unittest.TestCase):
             [],
         )
 
+    def test_task_hyphens_do_not_look_like_credentials(self) -> None:
+        self.assertEqual(scan_text(Path("README.md"), "task-requirement\nrisk-aware\n"), [])
+
+    def test_credential_prefix_requires_a_token_shaped_value(self) -> None:
+        token = "s" + "k-" + "abcdefgh123456"
+        self.assertEqual(scan_text(Path("sample"), token), [("credential prefix", 1)])
+
+
     def test_contact_and_host_path_are_detected_without_echoing_values(self) -> None:
         email = "person" + "@" + "example.invalid"
         host_path = "C:" + chr(92) + "private" + chr(92) + "file.txt"

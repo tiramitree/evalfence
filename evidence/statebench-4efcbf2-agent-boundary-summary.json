@@ -1,0 +1,197 @@
+{
+    "api_boundary": {
+        "agent_client_calls": 0,
+        "judge_calls": 0,
+        "simulator_client_calls": 0
+    },
+    "boundary_case_sha256": "2e5559c6ee9ebb199ba82c6c246bfa84bd9b658f9aee08074980152891d74a00",
+    "causal_control": {
+        "deterministic_state_score_delta": 1,
+        "official_score_claimed": false,
+        "protocol_compliant_run": false,
+        "registered_task_id": "4-brand_bundle_missed",
+        "state_requirements_removed_control": {
+            "deterministic_state_score": 0,
+            "state_diff_empty": true,
+            "tool_calls": 0,
+            "tool_errors": 0
+        },
+        "unsafe_context_arm": {
+            "deterministic_state_score": 1,
+            "state_diff_empty": false,
+            "tool_calls": 2,
+            "tool_errors": 0
+        }
+    },
+    "publication_boundary": {
+        "external_adoption_claimed": false,
+        "leaderboard_effect_claimed": false,
+        "model_result_claimed": false,
+        "raw_environment_content_emitted": false,
+        "raw_requirement_content_emitted": false,
+        "raw_task_content_emitted": false,
+        "raw_trajectory_content_emitted": false
+    },
+    "runtime_context_probe": {
+        "baseline_before_first_turn_in_all_domains": true,
+        "constructor_before_baseline_in_all_domains": true,
+        "domain_count": 3,
+        "domains": [
+            {
+                "callable_write_handler_count": 7,
+                "constructor_handler_count": 17,
+                "domain": "travel",
+                "events": [
+                    "agent_constructor",
+                    "baseline_snapshot",
+                    "first_agent_turn",
+                    "final_snapshot"
+                ],
+                "state_requirements": {
+                    "item_count": 4,
+                    "mutable_source_alias": true,
+                    "payload_equal": true,
+                    "payload_sha256": "ce87b8d9203438810408053a9595dd99a90ea53a42dc79b9c2af22f82cad761c"
+                },
+                "task_key_sha256": "6c5b025e14b4e847f720afe91ed386c2f6331a06b2869b3f1733d023129bee42",
+                "task_requirements": {
+                    "item_count": 2,
+                    "mutable_source_alias": true,
+                    "payload_equal": true,
+                    "payload_sha256": "fe6676c7002f2b102f28d5899aafcd530142b8d2d9101b9c051da806bcf30ee6"
+                },
+                "task_summary_equal": true,
+                "write_handler_count": 7,
+                "write_handler_names_sha256": "a6b82403891e79f621e037a48a5917a3726159e102b17cd9e36c456e9256716b"
+            },
+            {
+                "callable_write_handler_count": 5,
+                "constructor_handler_count": 11,
+                "domain": "customer_support",
+                "events": [
+                    "agent_constructor",
+                    "baseline_snapshot",
+                    "first_agent_turn",
+                    "final_snapshot"
+                ],
+                "state_requirements": {
+                    "item_count": 6,
+                    "mutable_source_alias": true,
+                    "payload_equal": true,
+                    "payload_sha256": "97ae2a7b844c9beba40c9a23d25f35ebdd2978daf90ff236395065868a85f008"
+                },
+                "task_key_sha256": "94ce4752d0a2e5ad7c3b4b74e59216ce16a24e19c54e2b6b9fa2a724562dd3b7",
+                "task_requirements": {
+                    "item_count": 1,
+                    "mutable_source_alias": true,
+                    "payload_equal": true,
+                    "payload_sha256": "4d1dd42d88e66c3fdfa603ec4097e5f37f25cea7afc11fd8b4f83bd0e91fbec5"
+                },
+                "task_summary_equal": true,
+                "write_handler_count": 5,
+                "write_handler_names_sha256": "1171326506197c59f09a81a71af72935364b81e15515f54be37ef5c58c67a735"
+            },
+            {
+                "callable_write_handler_count": 8,
+                "constructor_handler_count": 18,
+                "domain": "shopping_assistant",
+                "events": [
+                    "agent_constructor",
+                    "baseline_snapshot",
+                    "first_agent_turn",
+                    "final_snapshot"
+                ],
+                "state_requirements": {
+                    "item_count": 4,
+                    "mutable_source_alias": true,
+                    "payload_equal": true,
+                    "payload_sha256": "4e8cc4d46334582c10193acd498e59497c8f6da764284c00f4607a165a470b39"
+                },
+                "task_key_sha256": "4daebd9a4cecb05b03da4a50dd123da3ed2dd2813f308a06f4e42887543d30cd",
+                "task_requirements": {
+                    "item_count": 6,
+                    "mutable_source_alias": true,
+                    "payload_equal": true,
+                    "payload_sha256": "2481b6fed336ef5d60f928afa98f85efb1b4860e9bd54fff4da523cd6dd7b486"
+                },
+                "task_summary_equal": true,
+                "write_handler_count": 8,
+                "write_handler_names_sha256": "e495a61f503dd264d3a61ad147d56c192e28bd948c624c3fc8ea7e8ce1953e37"
+            }
+        ],
+        "state_requirement_item_count": 14,
+        "task_requirement_item_count": 9,
+        "write_handler_count": 20
+    },
+    "schema_version": "evalfence.statebench-case-study-summary.v1",
+    "source_shape": {
+        "agent_runtime_required_field_count": 7,
+        "base_agent_context_assignment_count": 1,
+        "baseline_snapshot_before_first_agent_turn": true,
+        "constructor_before_baseline_snapshot": true,
+        "custom_client_context_metadata_description_count": 1,
+        "custom_client_ignore_handler_instruction_count": 1,
+        "learning_track_oracle_statement_count": 2,
+        "live_handler_constructor_argument_count": 1,
+        "task_to_context_mapping_count": 3
+    },
+    "upstream": {
+        "commit": "4efcbf2d4fe60df04878859b692d9391f3d5b33a",
+        "package_version": "0.8.1",
+        "protocol_id": "state_bench_v0.8.1_gpt54",
+        "registered_file_count": 10,
+        "registered_files": {
+            "LICENSE": {
+                "crlf_checkout_sha256": "a6e337407113665041a928064a479586bb385443e313efb69ab410e46ace3ab6",
+                "git_blob_id": "75c58b5c7f47bd4b0f9f64fec44379de9ad4a2bf",
+                "git_blob_sha256": "2e969379b1a7eaeeefe741c576aa64e29099b9629b645e0e938bf2c88e7b5f0b"
+            },
+            "docs/AGENT_LEARNING_TRACK.md": {
+                "crlf_checkout_sha256": "cb338d79489326f7eb6a7dd42dbdbf1f4ffac85297bf9de8f08e2ce2a8349251",
+                "git_blob_id": "22148fe3f4e7d2275c28e502bdd5a17516d853ea",
+                "git_blob_sha256": "f111b5159d8842c4db210c7bbec1201880aace964dc69909d1fb38bd30ce8a0f"
+            },
+            "docs/USE_CUSTOM_CLIENT.md": {
+                "crlf_checkout_sha256": "6f639f955a97d183f3a6fb9cc9b031bffd98e7732e9aa8defd85b6fbafb45585",
+                "git_blob_id": "97bd45c53d5abaf5ba8cd964a6188bed55ab2255",
+                "git_blob_sha256": "92a1e09c1a55d9a9058c996cf3e30fde67a4c63096c92a0ce1a4e196ebd77d45"
+            },
+            "pyproject.toml": {
+                "crlf_checkout_sha256": "c65ee146cbff574950d225ce2fcfe498bcea0e578958a17a60cbc74578d5c5b5",
+                "git_blob_id": "58d05ee222be8e516fa6ebb4bbd995354cffd305",
+                "git_blob_sha256": "25813450621e1fec548b01932ae06870246131fd652c7d85bfa7507b440e7f8a"
+            },
+            "state_bench/agents/base.py": {
+                "crlf_checkout_sha256": "20a87153b902c37966d270ea1b14b2ce829097f65e0791058a9dedfb05973cbb",
+                "git_blob_id": "5fd22338a6e847ba25c1fa0cb3c553b703570f49",
+                "git_blob_sha256": "da6465ac1bf381cfb3b315bd18589dd5b8247658f2c773499fc2d84be21ea153"
+            },
+            "state_bench/domains/shopping_assistant/task_envs/4-brand_bundle_missed.json": {
+                "crlf_checkout_sha256": "9ec500cbd4e1cb1d58fe6c2127bd79c5d7d93bf60c48f40974f7cf671f572778",
+                "git_blob_id": "70ca2f91acdb970a50748280bc6af0c5da7d6ffd",
+                "git_blob_sha256": "82596ee03f2500bb38d35d23f0f302b77b5ccc6ee0364aaa703d78fca60db556"
+            },
+            "state_bench/domains/shopping_assistant/tasks/4-brand_bundle_missed.json": {
+                "crlf_checkout_sha256": "905c7b8c34daf72f38f8213ef898dac4a00e8366f5c40be7696f2e7e039ce267",
+                "git_blob_id": "9d036d10cfeb0baf195e6202d65eacabe88d8164",
+                "git_blob_sha256": "ebb02885230511fb45e3450d4027604ad6acbd128fbfc936a593a39c2db01aeb"
+            },
+            "state_bench/orchestrator.py": {
+                "crlf_checkout_sha256": "edac1a15e62b9b6c5accee905198ab3ebe994d31dc9a9c686131b1570c835d96",
+                "git_blob_id": "5f0437cc536352f2408336ae86be56acf8c5b192",
+                "git_blob_sha256": "50795142687841e9b470d4454e7f22b79c4d2b93a18786e87a61a88fe3d6c9a8"
+            },
+            "state_bench/schemas.py": {
+                "crlf_checkout_sha256": "42527e548bd4b1e509cfedfc081d76f0f28e23de3a5dee1be26d33075ebf876b",
+                "git_blob_id": "add69637ffa67b8d000124fc403dd08f02295dcf",
+                "git_blob_sha256": "5fbadcfeba076542920aa6cb2e5e1295b20f75d905a196a1f62b61789c894f29"
+            },
+            "state_bench/scripts/run_batch.py": {
+                "crlf_checkout_sha256": "1836e7396107d4ef4b00a34f844f2297b9bb5a0932392bd086b98c3c74c4d14e",
+                "git_blob_id": "cd58b538d6394211c959cc790d7c1388f65f9c43",
+                "git_blob_sha256": "c062c775a9444b4a60c4ba82b1a024a5bc33f5f468061205147dba9f96d6a560"
+            }
+        },
+        "repository": "microsoft/STATE-Bench"
+    }
+}

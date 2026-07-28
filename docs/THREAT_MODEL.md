@@ -7,6 +7,7 @@
 - deterministic reports and stable findings;
 - keyed-manifest identity, digest, coverage, and collision declarations;
 - non-serialization of manifest record IDs in generated findings and witnesses;
+- declared custom-agent input, capability, mediation, and construction-order boundaries;
 - caller control over local input and output paths; and
 - absence of private contents in committed or uploaded evidence.
 
@@ -21,6 +22,9 @@
 - supplied count and formula disagreement;
 - empty, duplicate, unapproved, or missing keyed-manifest identities;
 - invalid payload digests and order-dependent last-write-wins collapse;
+- exposed task/scoring-oracle declarations and mutable source aliases;
+- inconsistent capability totals, callability, mediation, or exposure;
+- custom-agent construction declared before a baseline snapshot;
 - duplicate findings;
 - a failing case hidden inside a larger batch;
 - a dirty upstream worktree contaminating the public adapter import; and
@@ -33,6 +37,8 @@
 - executing untrusted evaluator code in the Rust core;
 - proving adapter semantics or payload-digest coverage without its frozen-source
   contract;
+- sandboxing arbitrary custom-agent Python or enforcing capability isolation;
+- proving a real runtime observation from a well-formed boundary declaration;
 - proving that a synthetic manifest control occurs in a real submission;
 - arbitrary static source-code taint analysis;
 - malicious local users who can replace the binary or inputs;
@@ -53,6 +59,8 @@
 - Keyed-manifest findings and witnesses expose group ordinals, positions, and
   payload digests, but do not serialize IDs from records or policy.
   Caller-controlled `case_id` is copied to the report.
+- Agent-boundary findings expose declared safe field/group names and counts,
+  but do not serialize the hashed payloads.
 - Findings use exit `2`; input and runtime errors use exit `1`.
 - Public adapters reject any tracked, untracked, or ignored upstream residue
   and verify canonical Git blob hashes before import or source inspection.

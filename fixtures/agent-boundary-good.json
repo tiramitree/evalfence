@@ -1,0 +1,49 @@
+{
+  "schema_version": "evalfence.agent-boundary.v1",
+  "case_id": "safe-custom-agent-boundary",
+  "inputs": [
+    {
+      "name": "task_id",
+      "classification": "runtime_metadata",
+      "present": true,
+      "item_count": 1,
+      "payload_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+      "mutable_source_alias": false
+    },
+    {
+      "name": "user_message",
+      "classification": "user_visible",
+      "present": true,
+      "item_count": 1,
+      "payload_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+      "mutable_source_alias": false
+    }
+  ],
+  "capabilities": [
+    {
+      "name": "domain.write_handlers",
+      "kind": "write_handler",
+      "exposed_to_agent": false,
+      "total_count": 4,
+      "callable_count": 0,
+      "mediated_count": 0
+    }
+  ],
+  "construction_order": {
+    "baseline_snapshot_before_agent_constructor": true,
+    "baseline_snapshot_before_first_agent_turn": true
+  },
+  "reported": {
+    "input_count": 2,
+    "oracle_input_count": 0,
+    "capability_group_count": 1,
+    "unmediated_write_callable_count": 0
+  },
+  "policy": {
+    "allowed_agent_inputs": ["task_id", "user_message"],
+    "forbid_oracle_inputs": true,
+    "forbid_mutable_source_aliases": true,
+    "require_write_capability_mediation": true,
+    "require_baseline_before_agent_constructor": true
+  }
+}

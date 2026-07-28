@@ -4,9 +4,9 @@
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
 EvalFence is a Rust CLI that audits declared metric, evidence-provenance,
-and keyed-manifest contracts for agent benchmarks.
+keyed-manifest, and custom-agent boundary contracts for agent benchmarks.
 
-It asks two independent bounded questions:
+It asks three independent bounded questions:
 
 > Were prediction and gold evidence supplied under distinct declarations, and
 > do the supplied metric fields use the denominator their names promise?
@@ -14,9 +14,12 @@ It asks two independent bounded questions:
 > Before records are collapsed into a keyed map, are task identities unique,
 > payload digests valid, coverage declared, and collision semantics explicit?
 
+> Which declared inputs and callable capabilities reach custom agent code, and
+> is the environment baseline captured before that code can run?
+
 The Rust core validates adapter-supplied labels, intervals, identities, digests,
-counts, and formulas. It does not observe or prove the upstream data flow that
-produced those adapter declarations.
+counts, classifications, capability totals, and formulas. It does not observe
+or prove the upstream data flow that produced those adapter declarations.
 
 ## Why this exists
 
@@ -68,6 +71,23 @@ The independent keyed-manifest contract `evalfence.keyed-manifest.v1` checks:
 An empty `required_ids` list explicitly permits partial submissions. The core
 does not decide which payload bytes an adapter hashes.
 
+The independent agent-boundary contract `evalfence.agent-boundary.v1` checks:
+
+- allowlisted custom-agent inputs;
+- explicit runtime, user-visible, task-oracle, and scoring-oracle classes;
+- mutable aliases to adapter-declared source objects;
+- exposed read/write capability groups;
+- callable, mediated, and total capability-count consistency; and
+- custom-agent construction versus baseline-snapshot order.
+
+Input classifications remain benchmark-specific adapter declarations. An empty
+input allowlist approves no non-oracle field, and invalid or duplicate safe-name
+entries fail closed. The core does not infer whether a field is an oracle or
+prove that an adapter observed the real runtime.
+
+See [the agent-boundary contract](docs/AGENT_BOUNDARY_CONTRACT.md) for exact
+schema and stable-code semantics.
+
 ## Quick start
 
 The repository pins Rust 1.97.1 and commits `Cargo.lock`.
@@ -108,6 +128,16 @@ The conflict fixture exits `2` with `EF202`, `EF203`, and `EF208`. Its report
 contains payload digests and record positions but does not serialize the record
 ID from the manifest.
 
+
+Audit a declared custom-agent boundary:
+
+```bash
+cargo run --locked -- audit-agent-boundary --input fixtures/agent-boundary-good.json --pretty
+cargo run --locked -- audit-agent-boundary --input fixtures/agent-boundary-exposed.json --pretty
+```
+
+The first fixture exits `0`. The second exits `2` with registered oracle,
+unmediated-write, pre-baseline-constructor, and mutable-alias findings.
 ## Case contract
 
 ```json
@@ -140,9 +170,10 @@ ID from the manifest.
 }
 ```
 
-See [the interval contract reference](docs/CONTRACT.md) and
-[keyed-manifest contract](docs/MANIFEST_CONTRACT.md) for exact fields and
-stable-code semantics.
+See [the interval contract reference](docs/CONTRACT.md),
+[keyed-manifest contract](docs/MANIFEST_CONTRACT.md), and
+[agent-boundary contract](docs/AGENT_BOUNDARY_CONTRACT.md) for exact fields
+and stable-code semantics.
 
 ## ContextBench case study
 
@@ -238,21 +269,57 @@ python scripts/verify_manifest_case_study.py   --summary build/swebench-manifest
 The upstream worktree must contain only exact tracked files. CI regenerates
 the bounded summary and both reports from a fresh detached checkout.
 
+
+## STATE-Bench custom-agent boundary case study
+
+The third adapter is pinned to
+[`microsoft/STATE-Bench@4efcbf2`](https://github.com/microsoft/STATE-Bench/tree/4efcbf2d4fe60df04878859b692d9391f3d5b33a),
+an MIT-licensed stateful-agent benchmark.
+
+At that exact revision, source and AST checks bind the custom-agent context
+construction, live handler argument, and baseline-snapshot order. A no-API
+runtime probe uses one public test task in each of the three registered domains.
+It observes 14 state-requirement items, nine task-requirement items, and 20
+callable write handlers reaching the declared custom-agent boundary.
+
+A separate registered shopping control derives two normal harness-executed
+tool calls only from the supplied runtime context. Its deterministic state
+score is `1`; removing only `state_requirements` from the same context makes no
+calls and scores `0`. This is not a protocol-compliant or official score.
+
+The generated boundary case produces three oracle-input, three
+unmediated-write, one pre-baseline-constructor, and two mutable-alias findings.
+It does not show that any submitted agent used those fields or callables, or
+that a leaderboard result was affected. See
+[the bounded STATE-Bench case study](docs/STATE_BENCH_CASE_STUDY.md).
+
+```bash
+python scripts/statebench_boundary_audit.py \
+  --statebench-root statebench \
+  --case-out build/statebench-boundary/case.json \
+  --summary-out build/statebench-boundary/summary.json
+cargo run --locked -- audit-agent-boundary \
+  --input build/statebench-boundary/case.json \
+  --output build/statebench-boundary/report.json
+```
 ## Security and privacy boundary
 
 The Rust core performs no network or subprocess operation and reads only the
 named JSON or JSONL input. The interval lane rejects host and traversal paths.
-Both single-case commands are bounded to 8 MiB; interval batch input is bounded
-to 64 MiB, 1 MiB per row, and 100,000 cases. The core never needs source
-contents, prompts, trajectories, credentials, or model responses. Manifest
-findings and witnesses do not serialize record IDs; the caller-controlled
-`case_id` is copied to the report and therefore requires publication review.
+All three single-case commands are bounded to 8 MiB; interval batch input is
+bounded to 64 MiB, 1 MiB per row, and 100,000 cases. The core never needs
+source contents, prompts, trajectories, credentials, or model responses.
+Manifest findings do not serialize record IDs. Boundary findings expose only
+declared safe field/group names and counts, while payloads remain optional
+hashes. The caller-controlled `case_id` is copied to reports and requires
+publication review.
 
 The separate Python adapters read clean exact public clones and hash-bound
-files. The ContextBench lane emits only public instance identifiers, relative
-interval coordinates, counts, and metric values. The SWE-bench lane emits one
-synthetic identifier and payload digests. Neither copies issue text, patches,
-prompts, trajectories, or repository source into checked evidence.
+files. The ContextBench lane emits public instance identifiers, coordinates,
+counts, and metrics; the SWE-bench lane emits one synthetic identifier and
+digests; the STATE-Bench lane emits field names, counts, hashes, and bounded
+result relationships. Checked evidence copies no task text, requirement
+payload, environment payload, prompt, trajectory, patch, or repository source.
 
 CI includes a generic text-only privacy gate for common contact data, host
 paths, credential filenames, key markers, and token prefixes. It is a backstop,
@@ -262,18 +329,19 @@ fixtures, artifacts, or issues.
 
 ## What this does not prove
 
-EvalFence v0.2 is not:
+EvalFence v0.3 is not:
 
 - proof of actual data-flow provenance beyond adapter declarations;
 - a complete static taint analyzer for arbitrary evaluator source;
 - proof that omitted or null reported fields are correct;
 - a model-quality, harness-quality, or coding-success benchmark;
 - evidence that a public aggregate or leaderboard was affected;
-- a sandbox, statistical significance framework, or production deployment;
+- a sandbox, capability-secure runtime, whole-program taint analyzer,
+  statistical significance framework, or production deployment;
 - evidence of external adoption, independent review, or endorsement.
 
-Generalization beyond the exact ContextBench and SWE-bench controls needs a
-separately declared adapter contract and evidence.
+Generalization beyond the exact ContextBench, SWE-bench, and STATE-Bench
+controls needs a separately declared adapter contract and evidence.
 
 ## Development provenance
 
@@ -288,18 +356,21 @@ independent review, endorsement, or external adoption signal.
 cargo fmt --all -- --check
 cargo clippy --all-targets --locked -- -D warnings
 cargo test --all-targets --locked
-python -m py_compile scripts/contextbench_audit.py scripts/swebench_manifest_audit.py scripts/privacy_gate.py scripts/verify_case_study.py scripts/verify_manifest_case_study.py
+python -m py_compile \
+  scripts/contextbench_audit.py scripts/swebench_manifest_audit.py \
+  scripts/statebench_boundary_audit.py scripts/privacy_gate.py \
+  scripts/verify_case_study.py scripts/verify_manifest_case_study.py scripts/verify_statebench_case_study.py
 python -m unittest discover -s tests -p 'test_*.py'
 python scripts/privacy_gate.py --root .
 ```
 
-CI is configured to run the Rust suite on Linux, Windows, and macOS and both
-pinned case studies on Linux. See [CONTRIBUTING.md](CONTRIBUTING.md) and
+CI is configured to run the Rust suite on Linux, Windows, and macOS and all
+three pinned case studies on Linux. See [CONTRIBUTING.md](CONTRIBUTING.md) and
 [SECURITY.md](SECURITY.md).
 
 ## License
 
-Original EvalFence code is Apache-2.0. ContextBench and SWE-bench remain
-copyright their authors and are referenced under their Apache-2.0 and MIT
-licenses respectively. EvalFence does not vendor either upstream source or
-dataset files.
+Original EvalFence code is Apache-2.0. ContextBench, SWE-bench, and STATE-Bench
+remain copyright their authors and are referenced under their Apache-2.0, MIT,
+and MIT licenses respectively. EvalFence does not vendor upstream source,
+datasets, task definitions, environments, prompts, or trajectories.
