@@ -301,6 +301,11 @@ python scripts/statebench_boundary_audit.py \
 cargo run --locked -- audit-agent-boundary \
   --input build/statebench-boundary/case.json \
   --output build/statebench-boundary/report.json
+python scripts/verify_statebench_case_study.py \
+  --expected-summary evidence/statebench-4efcbf2-agent-boundary-summary.json \
+  --summary build/statebench-boundary/summary.json \
+  --case build/statebench-boundary/case.json \
+  --report build/statebench-boundary/report.json
 ```
 ## Security and privacy boundary
 

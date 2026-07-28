@@ -50,7 +50,6 @@ jobs:
             --statebench-root "$RUNNER_TEMP/statebench" \
             --case-out build/statebench-boundary/case.json \
             --summary-out build/statebench-boundary/summary.json
-          python -c "import json; assert json.load(open('evidence/statebench-4efcbf2-agent-boundary-summary.json', encoding='utf-8')) == json.load(open('build/statebench-boundary/summary.json', encoding='utf-8'))"
       - name: Run EvalFence and require registered findings
         run: |
           set +e
@@ -64,6 +63,7 @@ jobs:
       - name: Verify exact relationships and finding counts
         run: |
           python scripts/verify_statebench_case_study.py \
+            --expected-summary evidence/statebench-4efcbf2-agent-boundary-summary.json \
             --summary build/statebench-boundary/summary.json \
             --case build/statebench-boundary/case.json \
             --report build/statebench-boundary/report.json

@@ -123,6 +123,7 @@ target/debug/evalfence audit-agent-boundary \
   --output build/statebench-boundary/report.json \
   --pretty
 python scripts/verify_statebench_case_study.py \
+  --expected-summary evidence/statebench-4efcbf2-agent-boundary-summary.json \
   --summary build/statebench-boundary/summary.json \
   --case build/statebench-boundary/case.json \
   --report build/statebench-boundary/report.json

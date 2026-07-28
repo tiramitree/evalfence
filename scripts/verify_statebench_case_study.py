@@ -78,6 +78,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--summary", type=Path, required=True)
     parser.add_argument("--case", type=Path, required=True)
     parser.add_argument("--report", type=Path, required=True)
+    parser.add_argument("--expected-summary", type=Path, required=True)
     return parser.parse_args()
 
 
@@ -114,6 +115,61 @@ def audit_public_shape(value: Any, location: str = "$") -> None:
         require("\r" not in value and "\n" not in value, f"multiline string at {location}")
         for pattern in DENIED_VALUE_PATTERNS:
             require(not pattern.search(value), f"private-data pattern at {location}")
+
+
+def differing_paths(
+    expected: Any,
+    observed: Any,
+    location: str = "$",
+) -> list[str]:
+    if type(expected) is not type(observed):
+        return [location]
+    if isinstance(expected, dict):
+        expected_keys = set(expected)
+        observed_keys = set(observed)
+        paths = [
+            f"{location}.{key}"
+            for key in sorted(expected_keys ^ observed_keys)
+        ]
+        for key in sorted(expected_keys & observed_keys):
+            paths.extend(
+                differing_paths(
+                    expected[key],
+                    observed[key],
+                    f"{location}.{key}",
+                )
+            )
+        return paths
+    if isinstance(expected, list):
+        paths = (
+            []
+            if len(expected) == len(observed)
+            else [f"{location}.length"]
+        )
+        for index in range(min(len(expected), len(observed))):
+            paths.extend(
+                differing_paths(
+                    expected[index],
+                    observed[index],
+                    f"{location}[{index}]",
+                )
+            )
+        return paths
+    return [] if expected == observed else [location]
+
+
+def verify_exact_summary(
+    expected: dict[str, Any],
+    observed: dict[str, Any],
+) -> None:
+    paths = differing_paths(expected, observed)
+    detail = ", ".join(paths[:20])
+    if len(paths) > 20:
+        detail += f", and {len(paths) - 20} more"
+    require(
+        not paths,
+        f"generated summary differs from committed evidence at {detail}",
+    )
 
 
 def verify_case(case: dict[str, Any]) -> None:
@@ -348,12 +404,14 @@ def verify_report(report: dict[str, Any]) -> None:
 def main() -> int:
     args = parse_args()
     summary = load_object(args.summary)
+    expected_summary = load_object(args.expected_summary)
     case = load_object(args.case)
     report = load_object(args.report)
-    for value in (summary, case, report):
+    for value in (expected_summary, summary, case, report):
         audit_public_shape(value)
     verify_case(case)
     verify_summary(summary, case)
+    verify_exact_summary(expected_summary, summary)
     verify_report(report)
     print(
         "statebench-case-study: verified 3 domains, "
