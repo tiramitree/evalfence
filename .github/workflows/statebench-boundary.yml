@@ -68,12 +68,15 @@ jobs:
             --case build/statebench-boundary/case.json \
             --report build/statebench-boundary/report.json
       - name: Privacy-gate generated evidence
+        if: ${{ always() }}
+        id: generated_privacy
         run: |
           python scripts/privacy_gate.py --root . \
             --extra build/statebench-boundary/case.json \
             --extra build/statebench-boundary/summary.json \
             --extra build/statebench-boundary/report.json
       - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        if: ${{ always() && steps.generated_privacy.outcome == 'success' }}
         with:
           name: statebench-agent-boundary
           path: |
