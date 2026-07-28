@@ -3,7 +3,7 @@
 Small, evidence-backed contributions are welcome through GitHub issues and pull
 requests.
 
-Before proposing a new adapter or metric:
+Before proposing a new adapter, metric, or manifest contract:
 
 1. identify an exact public protocol or upstream revision;
 2. separate prediction, gold, and evaluator-generated artifacts;

@@ -4,7 +4,7 @@ use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
 use clap::{Parser, Subcommand};
-use evalfence::{AuditCase, audit_batch, audit_case};
+use evalfence::{AuditCase, ManifestCase, audit_batch, audit_case, audit_manifest};
 
 const MAX_CASE_BYTES: u64 = 8 * 1024 * 1024;
 const MAX_BATCH_BYTES: u64 = 64 * 1024 * 1024;
@@ -43,6 +43,18 @@ enum Command {
         /// Maximum failing case examples retained in the aggregate report.
         #[arg(long, default_value_t = 10)]
         max_examples: usize,
+        /// Pretty-print JSON.
+        #[arg(long)]
+        pretty: bool,
+    },
+    /// Audit one keyed prediction manifest for identity and collapse hazards.
+    AuditManifest {
+        /// Input keyed-manifest JSON path, or '-' for stdin.
+        #[arg(short, long)]
+        input: String,
+        /// Optional report path. Stdout is used when omitted.
+        #[arg(short, long)]
+        output: Option<PathBuf>,
         /// Pretty-print JSON.
         #[arg(long)]
         pretty: bool,
@@ -116,6 +128,18 @@ fn run() -> Result<bool, String> {
             let report = audit_batch(&cases, max_examples);
             write_json(&report, output.as_deref(), pretty)?;
             Ok(report.failed == 0)
+        }
+        Command::AuditManifest {
+            input,
+            output,
+            pretty,
+        } => {
+            let bytes = read_input(&input, MAX_CASE_BYTES)?;
+            let case: ManifestCase = serde_json::from_slice(&bytes)
+                .map_err(|error| format!("invalid keyed-manifest JSON: {error}"))?;
+            let report = audit_manifest(&case);
+            write_json(&report, output.as_deref(), pretty)?;
+            Ok(report.passed)
         }
     }
 }

@@ -1,0 +1,79 @@
+name: SWE-bench manifest case study
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: swebench-manifest-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  swebench-manifest-case-study:
+    name: swebench-manifest-case-study
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: "3.12"
+      - name: Public privacy gate
+        run: python scripts/privacy_gate.py --root .
+      - name: Check adapter and verifier syntax
+        run: >-
+          python -m py_compile
+          scripts/swebench_manifest_audit.py
+          scripts/verify_manifest_case_study.py
+      - name: Install pinned Rust toolchain
+        run: |
+          rustup set profile minimal
+          rustup toolchain install 1.97.1
+          rustup default 1.97.1
+      - name: Build EvalFence
+        run: cargo build --locked
+      - name: Fetch exact SWE-bench revision outside the source tree
+        run: |
+          git init "$RUNNER_TEMP/swebench"
+          git -C "$RUNNER_TEMP/swebench" remote add origin https://github.com/SWE-bench/SWE-bench.git
+          git -C "$RUNNER_TEMP/swebench" fetch --depth 1 origin f7bbbb2ccdf479001d6467c9e34af59e44a840f9
+          git -C "$RUNNER_TEMP/swebench" checkout --detach FETCH_HEAD
+      - name: Generate source-bound order controls
+        run: |
+          python scripts/swebench_manifest_audit.py \
+            --swebench-root "$RUNNER_TEMP/swebench" \
+            --evalfence-bin target/debug/evalfence \
+            --output-dir build/swebench-manifest
+          python -c "import json; assert json.load(open('evidence/swebench-f7bbbb2-manifest-case-study-summary.json', encoding='utf-8')) == json.load(open('build/swebench-manifest/summary.json', encoding='utf-8'))"
+      - name: Verify report relationships
+        run: |
+          python scripts/verify_manifest_case_study.py \
+            --summary build/swebench-manifest/summary.json \
+            --forward-report build/swebench-manifest/forward-report.json \
+            --reverse-report build/swebench-manifest/reverse-report.json
+      - name: Privacy-gate generated evidence
+        run: |
+          python scripts/privacy_gate.py --root . \
+            --extra build/swebench-manifest/forward-case.json \
+            --extra build/swebench-manifest/reverse-case.json \
+            --extra build/swebench-manifest/forward-report.json \
+            --extra build/swebench-manifest/reverse-report.json \
+            --extra build/swebench-manifest/summary.json
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: swebench-manifest-case-study
+          path: |
+            build/swebench-manifest/summary.json
+            build/swebench-manifest/forward-report.json
+            build/swebench-manifest/reverse-report.json
+          if-no-files-found: error
+          retention-days: 14

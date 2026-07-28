@@ -1,0 +1,58 @@
+{
+  "schema_version": "evalfence.swebench-manifest-case-study.v1",
+  "scope": {
+    "upstream": "SWE-bench/SWE-bench",
+    "commit": "f7bbbb2ccdf479001d6467c9e34af59e44a840f9",
+    "license": "MIT",
+    "files_sha256": {
+      "swebench/harness/utils.py": "c21797d88ab640db8dea67838e2f1bd16d45ce3ddf3aedc5ac1965068bff3cae",
+      "swebench/harness/run_evaluation.py": "6959f0b4e4eaf979771f529b88e3e9df1daa7fe86bc4291feec2e7d320bf7f2e",
+      "docs/assets/evaluation.md": "1932e475a4ee2129664a9107ea162bdb15dfd65a40781068b382dbfdf2debda9",
+      "LICENSE": "2bd2e08df7147f67a69b42c10efae09bd4bf119df397371036187d5dd1b02f57",
+      "swebench/harness/constants/__init__.py": "c12fe2671fd8b7d8af8f5c711fceb2ca684254e2c1b4cde448422a44b8d04e35"
+    },
+    "loader_shape": {
+      "instance_id_presence_checks": 1,
+      "accepted_file_suffixes": 2
+    },
+    "consumer_shape": {
+      "loader_assignments": 1,
+      "last_write_wins_dict_comprehensions": 1
+    },
+    "documentation": {
+      "documents_unique_task_instance_id": true,
+      "documents_partial_predictions_allowed": true
+    },
+    "evaluation_keys": {
+      "KEY_INSTANCE_ID": "instance_id",
+      "KEY_MODEL": "model_name_or_path",
+      "KEY_PREDICTION": "model_patch"
+    }
+  },
+  "observations": {
+    "synthetic_record_count": 2,
+    "synthetic_unique_id_count": 1,
+    "synthetic_distinct_payload_count": 2,
+    "forward_survivor_sha256": "34a3642888f0a258c7703dc2d9e76252ccfc7ddf454e70f3fbda7c766bd29c64",
+    "reverse_survivor_sha256": "3ee13bed95f00bc471bd9e2bc17b19ce88adcee2ce61692ea14cb5a97e593b9d",
+    "survivor_changes_when_input_order_reverses": true,
+    "forward_finding_codes": [
+      "EF202_DUPLICATE_RECORD_ID",
+      "EF203_CONFLICTING_DUPLICATE_PAYLOAD",
+      "EF208_ORDER_DEPENDENT_COLLAPSE"
+    ],
+    "reverse_finding_codes": [
+      "EF202_DUPLICATE_RECORD_ID",
+      "EF203_CONFLICTING_DUPLICATE_PAYLOAD",
+      "EF208_ORDER_DEPENDENT_COLLAPSE"
+    ],
+    "reports_expose_record_ids": false
+  },
+  "boundaries": [
+    "The source-bound observation covers one exact public SWE-bench revision and two synthetic records.",
+    "The adapter inspects source syntax and simulates the exact keyed-dictionary collapse; it does not import or execute SWE-bench.",
+    "The control does not run Docker, a dataset, a model, an API, a leaderboard submission, or a paid service.",
+    "It does not establish that any real prediction file contains duplicates or that any published score changed.",
+    "It does not claim a SWE-bench defect, nonconformance, endorsement, adoption, or external review."
+  ]
+}

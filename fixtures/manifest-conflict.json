@@ -1,0 +1,25 @@
+{
+  "schema_version": "evalfence.keyed-manifest.v1",
+  "case_id": "conflicting-duplicate-manifest",
+  "records": [
+    {
+      "id": "example__repo-1",
+      "payload_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+    },
+    {
+      "id": "example__repo-1",
+      "payload_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"
+    }
+  ],
+  "reported": {
+    "record_count": 2,
+    "unique_id_count": 1
+  },
+  "policy": {
+    "allowed_ids": [
+      "example__repo-1"
+    ],
+    "required_ids": [],
+    "consumer_collision_policy": "last_write_wins"
+  }
+}

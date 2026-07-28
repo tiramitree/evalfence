@@ -1,4 +1,8 @@
-# EvalFence v0.1 contract
+# Interval and metric contract
+
+This document defines `evalfence.case.v1`. The independent cross-record
+identity contract is defined in [MANIFEST_CONTRACT.md](MANIFEST_CONTRACT.md).
+Neither contract changes the other's strict schema or semantics.
 
 ## Evidence model
 

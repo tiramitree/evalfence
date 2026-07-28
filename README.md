@@ -3,15 +3,20 @@
 [![CI](https://github.com/tiramitree/evalfence/actions/workflows/ci.yml/badge.svg)](https://github.com/tiramitree/evalfence/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 
-EvalFence is a Rust CLI that audits declared metric and evidence-provenance
-contracts for agent benchmarks.
+EvalFence is a Rust CLI that audits declared metric, evidence-provenance,
+and keyed-manifest contracts for agent benchmarks.
+
+It asks two independent bounded questions:
 
 > Were prediction and gold evidence supplied under distinct declarations, and
 > do the supplied metric fields use the denominator their names promise?
 
-The Rust core validates adapter-supplied labels, intervals, counts, and formulas.
-It does not observe or prove the upstream data flow that produced those
-adapter declarations.
+> Before records are collapsed into a keyed map, are task identities unique,
+> payload digests valid, coverage declared, and collision semantics explicit?
+
+The Rust core validates adapter-supplied labels, intervals, identities, digests,
+counts, and formulas. It does not observe or prove the upstream data flow that
+produced those adapter declarations.
 
 ## Why this exists
 
@@ -19,14 +24,15 @@ Agent evaluations combine model output, trajectories, patches, gold annotations,
 repository state, and several metric layers. A score can look plausible even
 when an absent prediction is represented by a gold-derived artifact, a field
 named `recall` divides by prediction size, interval overlap is double-counted,
-or a batch hides failed cases behind a successful process.
+duplicate task IDs are silently collapsed, or a batch hides failed cases behind
+a successful process.
 
 EvalFence makes a declared contract executable. Findings exit `2`, input or
 runtime errors exit `1`, and a clean audit exits `0`.
 
 ## Current scope
 
-The v0.1 contract checks:
+The interval contract `evalfence.case.v1` checks:
 
 - explicit prediction and gold input-presence declarations;
 - a nonempty, exact prediction-source allowlist;
@@ -48,6 +54,20 @@ produce `null`, not an implicit perfect or zero score.
 calculated metrics but compares only non-null reported fields. A passing report
 does not validate a metric that the input did not supply.
 
+The independent keyed-manifest contract `evalfence.keyed-manifest.v1` checks:
+
+- exact, non-empty record identities;
+- lowercase SHA-256 payload-digest syntax;
+- duplicate identities and conflicting duplicate payloads;
+- allowlisted and required identity coverage;
+- declared raw-record and unique-ID counts;
+- last-write-wins order-dependent collapse; and
+- generated findings and witnesses that replace record IDs with per-case group
+  ordinals.
+
+An empty `required_ids` list explicitly permits partial submissions. The core
+does not decide which payload bytes an adapter hashes.
+
 ## Quick start
 
 The repository pins Rust 1.97.1 and commits `Cargo.lock`.
@@ -57,7 +77,7 @@ cargo run --locked -- audit --input fixtures/good.json --pretty
 cargo run --locked -- audit --input fixtures/gold-fallback.json --pretty
 ```
 
-The first fixture exits `0`. The second exits `2` with:
+The first interval fixture exits `0`. The second exits `2` with:
 
 - `EF001_MISSING_PREDICTION_INPUT`
 - `EF002_GOLD_AS_PREDICTION`
@@ -76,6 +96,17 @@ cargo run --locked -- audit-batch \
 ```
 
 Use `-` as the input path to read from stdin.
+
+Audit one keyed manifest:
+
+```bash
+cargo run --locked -- audit-manifest   --input fixtures/manifest-good.json   --pretty
+cargo run --locked -- audit-manifest   --input fixtures/manifest-conflict.json   --pretty
+```
+
+The conflict fixture exits `2` with `EF202`, `EF203`, and `EF208`. Its report
+contains payload digests and record positions but does not serialize the record
+ID from the manifest.
 
 ## Case contract
 
@@ -109,8 +140,9 @@ Use `-` as the input path to read from stdin.
 }
 ```
 
-See [the contract reference](docs/CONTRACT.md) for exact field and stable-code
-semantics.
+See [the interval contract reference](docs/CONTRACT.md) and
+[keyed-manifest contract](docs/MANIFEST_CONTRACT.md) for exact fields and
+stable-code semantics.
 
 ## ContextBench case study
 
@@ -172,17 +204,55 @@ source, parser, metric-helper, dataset, dependency, observation, and violation
 hashes or counts. See
 [the bounded case-study note](docs/CONTEXTBENCH_CASE_STUDY.md).
 
+## SWE-bench keyed-manifest case study
+
+The second adapter is pinned to
+[`SWE-bench/SWE-bench@f7bbbb2`](https://github.com/SWE-bench/SWE-bench/tree/f7bbbb2ccdf479001d6467c9e34af59e44a840f9),
+an MIT-licensed coding-agent benchmark.
+
+At that exact revision, the official evaluation note labels `instance_id` as
+a unique task instance ID and permits partial prediction sets. The loader
+accepts JSON or JSONL records and checks that each contains `instance_id`.
+The evaluation entry point then constructs a Python dictionary keyed by that
+field.
+
+The source-bound adapter verifies exact Git blob hashes, registered
+prediction-key constants, and the registered AST shape. It supplies two synthetic records with the same ID and different
+payload digests. Reversing their order changes the simulated last-write-wins
+survivor. EvalFence emits the same duplicate, conflict, and order-dependence
+findings for both orders while binding the different survivor digest.
+
+The control does not import or execute SWE-bench and needs no Docker, dataset,
+model, GPU, API, or paid service. It does not establish that any real
+prediction file contains duplicates, that a published score changed, or that
+SWE-bench is defective or nonconforming.
+
+```bash
+git clone https://github.com/SWE-bench/SWE-bench.git swebench
+git -C swebench checkout f7bbbb2ccdf479001d6467c9e34af59e44a840f9
+cargo build --locked
+python scripts/swebench_manifest_audit.py   --swebench-root swebench   --evalfence-bin target/debug/evalfence   --output-dir build/swebench-manifest
+python scripts/verify_manifest_case_study.py   --summary build/swebench-manifest/summary.json   --forward-report build/swebench-manifest/forward-report.json   --reverse-report build/swebench-manifest/reverse-report.json
+```
+
+The upstream worktree must contain only exact tracked files. CI regenerates
+the bounded summary and both reports from a fresh detached checkout.
+
 ## Security and privacy boundary
 
-The Rust core performs no network or subprocess operation, reads only the named
-JSON or JSONL input, rejects host and traversal paths, and bounds a case to 8
-MiB, a batch to 64 MiB, a row to 1 MiB, and a batch to 100,000 cases. It never
-needs source contents, prompts, trajectories, credentials, or model responses.
+The Rust core performs no network or subprocess operation and reads only the
+named JSON or JSONL input. The interval lane rejects host and traversal paths.
+Both single-case commands are bounded to 8 MiB; interval batch input is bounded
+to 64 MiB, 1 MiB per row, and 100,000 cases. The core never needs source
+contents, prompts, trajectories, credentials, or model responses. Manifest
+findings and witnesses do not serialize record IDs; the caller-controlled
+`case_id` is copied to the report and therefore requires publication review.
 
-The separate Python adapter reads a clean exact public clone and hash-bound
-files. It emits only public instance identifiers, relative interval coordinates,
-counts, and metric values; it does not copy issue text, patches, prompts, or
-repository source into checked evidence.
+The separate Python adapters read clean exact public clones and hash-bound
+files. The ContextBench lane emits only public instance identifiers, relative
+interval coordinates, counts, and metric values. The SWE-bench lane emits one
+synthetic identifier and payload digests. Neither copies issue text, patches,
+prompts, trajectories, or repository source into checked evidence.
 
 CI includes a generic text-only privacy gate for common contact data, host
 paths, credential filenames, key markers, and token prefixes. It is a backstop,
@@ -192,7 +262,7 @@ fixtures, artifacts, or issues.
 
 ## What this does not prove
 
-EvalFence v0.1 is not:
+EvalFence v0.2 is not:
 
 - proof of actual data-flow provenance beyond adapter declarations;
 - a complete static taint analyzer for arbitrary evaluator source;
@@ -202,8 +272,8 @@ EvalFence v0.1 is not:
 - a sandbox, statistical significance framework, or production deployment;
 - evidence of external adoption, independent review, or endorsement.
 
-Generalization beyond the exact ContextBench case study needs a separately
-declared adapter contract and evidence.
+Generalization beyond the exact ContextBench and SWE-bench controls needs a
+separately declared adapter contract and evidence.
 
 ## Development provenance
 
@@ -218,17 +288,18 @@ independent review, endorsement, or external adoption signal.
 cargo fmt --all -- --check
 cargo clippy --all-targets --locked -- -D warnings
 cargo test --all-targets --locked
-python -m py_compile scripts/contextbench_audit.py scripts/privacy_gate.py scripts/verify_case_study.py
+python -m py_compile scripts/contextbench_audit.py scripts/swebench_manifest_audit.py scripts/privacy_gate.py scripts/verify_case_study.py scripts/verify_manifest_case_study.py
 python -m unittest discover -s tests -p 'test_*.py'
 python scripts/privacy_gate.py --root .
 ```
 
-CI is configured to run the Rust suite on Linux, Windows, and macOS and the
-pinned case study on Linux. See [CONTRIBUTING.md](CONTRIBUTING.md) and
+CI is configured to run the Rust suite on Linux, Windows, and macOS and both
+pinned case studies on Linux. See [CONTRIBUTING.md](CONTRIBUTING.md) and
 [SECURITY.md](SECURITY.md).
 
 ## License
 
-Original EvalFence code is Apache-2.0. ContextBench remains copyright its
-authors and is referenced under its Apache-2.0 license. EvalFence does not
-vendor ContextBench source or dataset files.
+Original EvalFence code is Apache-2.0. ContextBench and SWE-bench remain
+copyright their authors and are referenced under their Apache-2.0 and MIT
+licenses respectively. EvalFence does not vendor either upstream source or
+dataset files.

@@ -31,7 +31,7 @@ jobs:
         run: python scripts/privacy_gate.py --root .
       - name: Python checks
         run: |
-          python -m py_compile scripts/contextbench_audit.py scripts/privacy_gate.py scripts/verify_case_study.py tests/test_privacy_gate.py
+          python -m py_compile scripts/contextbench_audit.py scripts/swebench_manifest_audit.py scripts/privacy_gate.py scripts/verify_case_study.py scripts/verify_manifest_case_study.py tests/test_privacy_gate.py
           python -m unittest discover -s tests -p 'test_*.py'
       - name: Install pinned Rust toolchain
         run: |
